@@ -1,0 +1,104 @@
+# Hooks require a path.
+# If the build should stop when a hook fails, set required to true.
+# pre_build happens before the build
+# post_build happens after the build
+pre_build:
+  - path: stacker.hooks.route53.create_domain
+    required: false
+    # Additional args can be passed as a dict of key/value pairs in kwargs
+    # kwargs:
+# post_build:
+
+mappings:
+  AmiMap:
+    ap-southeast-2:
+      NAT: ami-9094b9f3
+      ubuntu1404: ami-29684a4a
+      bastion: ami-29684a4a
+
+vpc_parameters: &vpc_parameters
+  VpcId: vpc::VpcId # parametrs with ::'s in them refer to <stack>::<Output>
+  DefaultSG: vpc::DefaultSG
+  PublicSubnets: vpc::PublicSubnets
+  PrivateSubnets: vpc::PrivateSubnets
+  AvailabilityZones: vpc::AvailabilityZones
+
+stacks:
+  - name: vpc
+    class_path: private_blueprints.vpc.vpc.MyVpc
+    # Flag to enable/disable a stack. Default is true
+    enabled: true
+    parameters:
+      InstanceType: ${nat_instance_type}
+      SshKeyName: ${ssh_key_name}
+      ImageName: NAT
+      # Only build 2 AZs, can be overridden with -p on the command line
+      # Note: If you want more than 4 AZs you should add more subnets below
+      #       Also you need at least 2 AZs in order to use the DB because
+      #       of the fact that the DB blueprint uses MultiAZ
+      AZCount: 2
+      # Enough subnets for 4 AZs
+      PublicSubnets: 10.128.0.0/24,10.128.1.0/24,10.128.2.0/24,10.128.3.0/24
+      PrivateSubnets: 10.128.8.0/22,10.128.12.0/22,10.128.16.0/22,10.128.20.0/22
+      CidrBlock: 10.128.0.0/16
+      # Uncomment if you want an internal hosted zone for the VPC
+      # If provided, it will be added to the dns search path of the DHCP
+      # Options
+      InternalDomain: internal
+  - name: bastion
+    class_path: private_blueprints.bastion.Bastion
+    enabled: false
+    parameters:
+      # Extends the parameters dict with the contents of the vpc_parameters
+      # anchor. Basically we're including all VPC Outputs in the parameters
+      # of the bastion stack. Note: Stacker figures out, automatically, which
+      # parameters the stack actually needs and only submits those to each
+      # stack. For example, most stacks are in the PrivateSubnets, but not
+      # the PublicSubnets, but stacker deals with it for you.
+      << : *vpc_parameters
+      InstanceType: ${bastion_instance_type}
+      OfficeNetwork: ${bastion_allowed_network}
+      MinSize: 1
+      MaxSize: 1
+      SshKeyName: ${ssh_key_name}
+      ImageName: bastion
+  - name: mysqlMaster
+    class_path: private_blueprints.rds.mysql.MasterInstance
+    locked: true
+    enabled: false
+    parameters:
+      << : *vpc_parameters
+      Subnets: vpc::PrivateSubnets
+      InstanceType: ${db_instance_type}
+      AllowMajorVersionUpgrade: "false"
+      AutoMinorVersionUpgrade: "true"
+      AllocatedStorage: ${db_storage_size}
+      IOPS:
+      # InternalZoneName: vpc::InternalZoneName
+      # InternalZoneId: vpc::InternalZoneId
+      # InternalHostname: ${master_name}
+      DBInstanceIdentifier: ${master_name}
+      DBFamily: ${db_family}
+      EngineVersion: ${engine_version}
+      EngineMajorVersion: ${engine_major_version}
+      StorageEncrypted: ${master_storage_encrypted}
+      # MasterInstance specific
+      MasterUser: ${db_user}
+      MasterUserPassword: ${db_password}
+      DatabaseName: ${db_name}
+      MultiAZ: ${db_multi_az}
+  - name: myWeb
+    class_path: private_blueprints.asg.AutoscalingGroup
+    enabled: false
+    parameters:
+      << : *vpc_parameters
+      InstanceType: ${web_instance_type}
+      ImageName: ubuntu1404
+      MinSize: 2
+      MaxSize: 2
+      SshKeyName: ${ssh_key_name}
+      # If commented out, no load balancer will be created.
+      #ELBHostName: mysite
+      # Uncomment if you have a cert loaded in EC2 already and want to enable
+      # SSL on the load balancer.
+      #ELBCertName: mycert
