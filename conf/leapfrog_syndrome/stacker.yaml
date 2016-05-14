@@ -25,7 +25,7 @@ vpc_parameters: &vpc_parameters
 
 stacks:
   - name: vpc
-    class_path: private_blueprints.vpc.vpc.MyVpc
+    class_path: private_blueprints.leapfrog_syndrome.vpc.MyVpc
     # Flag to enable/disable a stack. Default is true
     enabled: true
     parameters:
@@ -46,8 +46,8 @@ stacks:
       # Options
       InternalDomain: internal
   - name: bastion
-    class_path: private_blueprints.bastion.Bastion
-    enabled: false
+    class_path: private_blueprints.leapfrog_syndrome.bastion.MyBastion
+    enabled: true
     parameters:
       # Extends the parameters dict with the contents of the vpc_parameters
       # anchor. Basically we're including all VPC Outputs in the parameters
@@ -88,17 +88,17 @@ stacks:
       DatabaseName: ${db_name}
       MultiAZ: ${db_multi_az}
   - name: myWeb
-    class_path: private_blueprints.asg.AutoscalingGroup
-    enabled: false
+    class_path: private_blueprints.leapfrog_syndrome.web.MyWeb
+    enabled: true
     parameters:
       << : *vpc_parameters
       InstanceType: ${web_instance_type}
       ImageName: ubuntu1404
-      MinSize: 2
-      MaxSize: 2
+      MinSize: ${azcount}
+      MaxSize: ${web_instance_count}
       SshKeyName: ${ssh_key_name}
       # If commented out, no load balancer will be created.
-      #ELBHostName: mysite
+      ELBHostName: mysite
       # Uncomment if you have a cert loaded in EC2 already and want to enable
       # SSL on the load balancer.
       #ELBCertName: mycert
