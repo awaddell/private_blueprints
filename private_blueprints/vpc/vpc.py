@@ -27,7 +27,14 @@ class MyVpc(BaseVPC):
             "type": str,
             "description": "Base CIDR block for subnets.",
             "default": "10.128.0.0/16"},
+        "AZCount":  {
+            "type": int,
+            "default": 2,
+        }
     }
+
+    def create_conditions(self):
+        super(BaseVPC, self).create_conditions()
 
     # Case 1: example override method using exact grandparent stanza
     def create_vpc(self):
@@ -51,9 +58,12 @@ class MyVpc(BaseVPC):
             Output('DefaultSG',
                    Value=Ref(DEFAULT_SG)))
 
+    def create_dhcp_options(self):
+        super(BaseVPC, self).create_dhcp_options()
+
     # Case 3: how can I make the grandparent method run using the grandparent method values?
     def create_network(self):
-        super(MyVpc, self).create_network()
+        super(BaseVPC, self).create_network()
 
         # otherwise, the grandparent method doesn't run at all
 

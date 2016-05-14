@@ -5,10 +5,7 @@ from setuptools import setup, find_packages
 src_dir = os.path.dirname(__file__)
 
 install_requires = [
-    "stacker_blueprints",
-    #     "troposphere>=1.3.0",
-    #     "awacs>=0.5.3",
-    #     "stacker>=0.5.4, <=0.6.2",
+    "stacker_blueprints>=0.6.2",
 ]
 
 tests_require = [
