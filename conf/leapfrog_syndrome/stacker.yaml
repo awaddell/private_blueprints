@@ -4,16 +4,17 @@
 # post_build happens after the build
 pre_build:
   - path: stacker.hooks.route53.create_domain
-    required: false
+    required: true
     # Additional args can be passed as a dict of key/value pairs in kwargs
-    # kwargs:
+    args:
+      domain: ${external_domain}
 # post_build:
 
 mappings:
   AmiMap:
     ap-southeast-2:
       NAT: ami-9094b9f3
-      ubuntu1404: ami-29684a4a
+      ubuntu1404: ami-52547b31 # isp20-trusty-apache_php 1463400673
       bastion: ami-29684a4a
 
 vpc_parameters: &vpc_parameters
@@ -36,11 +37,12 @@ stacks:
       # Note: If you want more than 4 AZs you should add more subnets below
       #       Also you need at least 2 AZs in order to use the DB because
       #       of the fact that the DB blueprint uses MultiAZ
-      AZCount: ${azcount}
+      AZCount: ${az_count}
       # Enough subnets for 4 AZs
       PublicSubnets: 10.128.0.0/24,10.128.1.0/24,10.128.2.0/24,10.128.3.0/24
       PrivateSubnets: 10.128.8.0/22,10.128.12.0/22,10.128.16.0/22,10.128.20.0/22
       CidrBlock: 10.128.0.0/16
+      BaseDomain: ${external_domain}
       # Uncomment if you want an internal hosted zone for the VPC
       # If provided, it will be added to the dns search path of the DHCP
       # Options
@@ -94,7 +96,7 @@ stacks:
       << : *vpc_parameters
       InstanceType: ${web_instance_type}
       ImageName: ubuntu1404
-      MinSize: ${azcount}
+      MinSize: ${web_instance_count}
       MaxSize: ${web_instance_count}
       SshKeyName: ${ssh_key_name}
       # If commented out, no load balancer will be created.

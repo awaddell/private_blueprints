@@ -1,0 +1,26 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": ""
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "ap-southeast-2",
+    "source_ami": "ami-6c14310f",
+    "instance_type": "m4.large",
+    "ssh_username": "ubuntu",
+    "ami_name": "isp20-trusty-apache_php {{timestamp}}"
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sleep 30",
+      "sudo apt-get update && sudo apt-get -y upgrade",
+      "sudo apt-get install -y apache2 curl git php5-cli php5-cgi libapache2-mod-php5",
+      "sudo apt-get install -y libcurl3 php-net-ftp php5-gd php-gettext php5-imap php5-mysql php5-pgsql php-pear",
+      "curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer"
+    ]
+  }]
+}
