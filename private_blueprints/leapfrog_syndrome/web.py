@@ -6,8 +6,6 @@ from private_blueprints.web.base import BaseWeb
 __author__ = 'awaddell'
 
 ELB_NAME = "%sLoadBalancer"
-# CLUSTER_SG_NAME = "%sSG"
-# ELB_SG_NAME = "%sElbSG"
 ASG_INSTANCE_NAME = "web"
 
 

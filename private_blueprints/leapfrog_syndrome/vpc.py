@@ -20,11 +20,12 @@ class MyVpc(BaseVPC):
         "CidrBlock": {
             "type": str,
             "description": "Base CIDR block for subnets.",
-            "default": "10.128.0.0/16"},
+            "default": "10.128.0.0/16"
+	},
         "AZCount":  {
             "type": int,
             "default": 2,
-        }
+        },
     }
 
     def create_conditions(self):
