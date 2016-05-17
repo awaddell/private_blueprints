@@ -58,8 +58,12 @@ class MyWeb(BaseWeb):
                 "apt_upgrade: true\n",
                 "ssh_authorized_keys:\n",
                 "  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChIC/Hxpqhxl6XTRHTkHR8p0DgVelczDmqCXkR4khh4PY5xp9i7F/IDXPRXt+4sfKrhdNclDMQh7AE2wyGHsOIWoeD47aKd10t6p4Tt42+e3N1ATRzXNCXP8DGeQx0ZgJ6O6Tls6V/ArXXnrnIxpvSamnrCcfVDCKUyFkxcVb02zhKUXJ81fKXSBrw1WSnOXLVT/Y8PBb0OlOFX/lYTZ7Bb3m3AxiCTEozLsmteDtGNJh4gzCNQ9l3SV+lFJ5l87Jc8y6YdXpDovXTl11z/5s03KNdnecSckLwkUuiYzufLkQdVsA8AfiTo1RwRTHuGjeL+RBPDN8xIa1AR/uzeaDt ali@isp20.com\n",
-                "packages:\n",
-                "  - nginx\n",
+                "write_files:\n",
+                "-  encoding: b64\n",
+                "   content: PD9waHAgcGhwaW5mbygpOyA/Pgo=\n",
+                "   path: /var/www/html/phpinfo.php\n",
+                "   permissions: '0644'\n",
+                "   owner: root:root\n",
             ]
         ))
         return stanza
