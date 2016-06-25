@@ -1,37 +1,38 @@
-__author__ = 'awaddell'
+# cat setup.py
 import os
+import glob
 from setuptools import setup, find_packages
 
 src_dir = os.path.dirname(__file__)
 
 install_requires = [
-    "stacker_blueprints>=0.6.2",
+    'PyYAML>=3.11',
+    'stacker==0.6.3',
+    'stacker_blueprints==0.6.5',
+    'awacs>=0.5.4',
+    'cloudconf',
+    'boto3',
+    'troposphere>=1.5.0'
 ]
 
-tests_require = [
-    #     "nose>=1.0",
-    #     "mock==1.0.1",
-]
+tests_require = (
+    'nose>=1.0',
+    'mock==1.0.1',
+)
 
 
-def read(filename):
-    full_path = os.path.join(src_dir, filename)
-    with open(full_path) as fd:
-        return fd.read()
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     setup(
-        name="private_blueprints",
-        version="0.0.1",
-        author="Alastair Waddell",
-        author_email="ali@isp20.com",
+        name='private_blueprints',
+        version='0.0.2',
+        author='Alastair Waddell',
+        author_email='ali@isp20.com',
         license="New BSD license",
-        url="https://github.com/isp20/private_blueprints",
-        description="Private blueprints for stacker",
-        long_description=read("README.rst"),
-        packages=find_packages(),
+        url="https://github.com/awaddell/private_blueprints",
+        description='Remind specific private stacks for Stacker',
         install_requires=install_requires,
         tests_require=tests_require,
-        test_suite="nose.collector",
+        test_suite='nose.collector',
+        packages=find_packages(),
+        scripts=glob.glob(os.path.join(src_dir, 'bin', 'scripts', '*'))
     )
